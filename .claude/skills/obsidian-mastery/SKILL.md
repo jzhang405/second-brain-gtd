@@ -296,10 +296,113 @@ Load references only when needed to keep context lean.
 
 ---
 
-## Integration with Commands
+## Examples
+
+### Example 1: Creating a New Project Note
+
+**User request:** "Create a project note for my website redesign"
+
+**You would:**
+1. Read `.claude/vault-config.json` to get vault folder (e.g., "General")
+2. Create file in `General/01-Projects/Website-Redesign.md`
+3. Add YAML frontmatter:
+   ```yaml
+   ---
+   title: "Website Redesign"
+   created: "2025-11-01"
+   status: active
+   type: project
+   priority: high
+   tags:
+     - project
+     - website
+   ---
+   ```
+4. Use project template structure from PARA methodology
+5. Link to related permanent notes about web design if they exist
+6. Follow PARA decision framework (project = has deadline/end state)
+
+### Example 2: Creating a Connected Permanent Note
+
+**User request:** "Create a permanent note about how context switching reduces focus"
+
+**You would:**
+1. Read vault config to get vault folder
+2. Search for related notes using Grep: "context", "focus", "productivity", "attention"
+3. Create `General/Permanent Notes/Context-Switching-Reduces-Focus.md`
+4. Add proper frontmatter:
+   ```yaml
+   ---
+   title: "Context Switching Reduces Focus"
+   created: "2025-11-01"
+   status: active
+   type: permanent-note
+   tags:
+     - permanent-note
+     - productivity
+     - focus
+     - attention
+   ---
+   ```
+5. Write atomic note content (100-300 words, one core idea, own words)
+6. Add 3+ meaningful links with relationship explanations:
+   - `[[Deep-Work]]` - Context switching prevents deep work (builds on this concept)
+   - `[[Attention-Residue]]` - Explains why switching costs focus (supports this idea)
+   - `[[Single-Tasking-Benefits]]` - Contrasts with this approach (opposite strategy)
+7. Follow Zettelkasten principles (atomic, connected, own words, concrete examples)
+
+### Example 3: Converting Fleeting Note to Permanent Note
+
+**User scenario:** "I want to develop this fleeting note into a permanent note"
+
+**Context:** Fleeting note says "Read article about how breaks improve productivity - something about attention restoration theory"
+
+**You would:**
+1. Read the fleeting note from `General/00-Inbox/Fleeting-Notes/`
+2. Search for related permanent notes (Grep for "breaks", "productivity", "attention", "rest")
+3. Create new permanent note using Atomic Note template: `General/Permanent Notes/Breaks-Restore-Attention.md`
+4. Extract the core insight in your own words (not copying article)
+5. Link to at least 3 related notes with explanations:
+   - `[[Focused-Work-Sessions]]` - Breaks are necessary between focus blocks
+   - `[[Productivity-Rhythms]]` - Natural energy cycles require recovery
+   - `[[Attention-Limits]]` - Attention is finite resource that needs restoration
+6. Add to relevant MOC if exists (e.g., link from `MOC - Productivity.md`)
+7. Update the fleeting note's status to "developed" or move to archives
+
+### Example 4: Processing an Inbox Capture into Proper Location
+
+**User scenario:** Processing inbox during workflow
+
+**Capture:** "Had an idea about using spaced repetition for client onboarding"
+
+**You would:**
+1. Recognize this is a knowledge item (not a task)
+2. Create fleeting note in `General/00-Inbox/Fleeting-Notes/Spaced-Repetition-Client-Onboarding.md`
+3. Add frontmatter:
+   ```yaml
+   ---
+   title: "Spaced Repetition for Client Onboarding"
+   created: "2025-11-01"
+   status: fleeting
+   type: fleeting-note
+   tags:
+     - fleeting-note
+     - client-onboarding
+     - learning
+   related:
+     - "[[Client-Onboarding-Process]]"
+   ---
+   ```
+4. Capture the thought quickly
+5. Mark for later development (user will expand into permanent note when ready)
+6. **Don't try to create permanent note immediately** - fleeting notes are for quick capture
+
+---
+
+## Integration with Workflows
 
 This skill works with:
-- `/process-inbox` - Provides structure for fleeting notes and reference notes
-- `/setup` - Creates initial folder structure
+- **Process Inbox Workflow** (gtd-workflow skill) - Provides structure for fleeting notes and reference notes
+- **Setup Command** - Creates initial folder structure
 - Standard Read/Write/Edit tools - File operations
 - Grep/Glob tools - Search for related notes when linking

@@ -1,6 +1,6 @@
 ---
 name: gtd-workflow
-description: Comprehensive Getting Things Done (GTD) methodology for task and project management. Provides knowledge of core GTD principles (capture, clarify, organize, reflect, engage) AND implementation guidance for our Obsidian-based system. Use when processing inbox items, creating or organizing tasks and projects, clarifying next actions, conducting reviews, or explaining GTD concepts.
+description: Comprehensive Getting Things Done (GTD) methodology for task and project management. Provides knowledge of core GTD principles (capture, clarify, organize, reflect, engage) AND three execution workflows (process inbox, daily planning, daily closeout) for our Obsidian-based system. Use when user wants to process inbox, plan their day, review their day, organize tasks and projects, clarify next actions, or understand GTD concepts.
 ---
 
 # GTD Workflow Skill
@@ -9,22 +9,74 @@ This skill provides two types of knowledge:
 
 1. **GTD Methodology** - David Allen's core principles and workflow (universal)
 2. **Our Implementation** - How we apply GTD in this Obsidian-based system (specific)
+3. **Three Execution Workflows** - Daily workflows for processing, planning, and closeout
 
 ---
 
 ## When to Use This Skill
 
-- Explaining GTD concepts and methodology to users
-- Processing inbox items with `/process-inbox`
-- Creating or organizing tasks and projects using GTD principles
-- Clarifying next actions and desired outcomes
-- Conducting project reviews
-- Planning daily work with `/daily-plan`
-- Routing items between GTD (actionable) and Zettelkasten (knowledge)
+**Trigger phrases:**
+- **Process inbox:** "process my inbox", "organize captures", "clarify inbox items", "get to inbox zero"
+- **Daily planning:** "plan my day", "what should I work on", "help me prioritize", "create today's plan"
+- **Daily closeout:** "review my day", "daily closeout", "how did I do today", "prepare for tomorrow"
+- **GTD concepts:** "explain GTD", "what's a next action", "how does this work"
+- **Task organization:** "where should this go", "is this a project or task", "how do I organize this"
 
 ---
 
-## References
+## Three Daily Workflows
+
+### 1. Process Inbox Workflow
+
+**When to use:** User wants to process inbox, organize captures, clarify items
+
+**See:** [workflows/process-inbox.md](workflows/process-inbox.md) for complete workflow
+
+**What it does:**
+- Scans inbox locations for unprocessed items
+- Asks clarifying questions for vague items
+- Applies GTD clarifying questions to each capture
+- Determines priority (high/next/someday)
+- Routes to appropriate location (projects, areas, relationships)
+- Reviews all active projects (quick health check)
+- Updates system state (_Context.md)
+
+### 2. Daily Plan Workflow
+
+**When to use:** User wants to plan their day, prioritize work, decide what to focus on
+
+**See:** [workflows/daily-plan.md](workflows/daily-plan.md) for complete workflow
+
+**What it does:**
+- **First:** Checks inbox (prompts to process if 5+ items)
+- Gathers intelligence from all active projects and areas
+- Asks about context, energy, time, deadlines (GTD four criteria)
+- Generates prioritized action list (must-do, should-do, quick wins)
+- Creates daily plan file
+- Updates _Context.md with today's focus
+
+**Key feature:** Inbox scanning integration - ensures inbox is processed before planning
+
+### 3. Daily Closeout Workflow
+
+**When to use:** User wants to review their day, reflect on accomplishments, prepare tomorrow
+
+**See:** [workflows/daily-closeout.md](workflows/daily-closeout.md) for complete workflow
+
+**What it does:**
+- **First:** Checks inbox (prompts to process if 5+ items)
+- Reviews today's plan and accomplishments
+- Marks completed/partial/deferred tasks
+- Captures unplanned work
+- Asks about tomorrow's priorities
+- Generates tomorrow's DRAFT plan (without energy/context)
+- Updates _Context.md
+
+**Key feature:** Inbox scanning integration - process items before closeout
+
+---
+
+## References & Methodology
 
 ### Core GTD Methodology
 
@@ -327,28 +379,35 @@ someday ←---→ deferred         cancelled
 
 ---
 
-## How Commands Coordinate
+## How Workflows Coordinate
 
-### `/capture` (Capture Stage)
+### `/capture` Command (Capture Stage)
 - Creates inbox items
 - Doesn't clarify or organize (that's for processing)
 - Low friction - just get it out of your head
+- **Still a command:** Signals "capture mode" for frictionless entry
 
-### `/process-inbox` (Clarify + Organize + Reflect)
-- Uses this GTD skill for actionable items
-- Hands off to obsidian-mastery for knowledge items
+### Process Inbox Workflow (Clarify + Organize + Reflect)
+- Uses GTD methodology for actionable items
+- Hands off to obsidian-mastery skill for knowledge items
 - Combines processing with project review
+- **Triggered by:** "process inbox", "organize captures", etc.
+- **Also called by:** Daily plan and closeout workflows (if 5+ inbox items)
 
-### `/daily-plan` (Engage Stage)
+### Daily Plan Workflow (Engage Stage)
+- **First:** Checks inbox, prompts to process if needed
 - Reads active projects
 - Applies four criteria (context, time, energy, priority)
 - Generates prioritized action list
 - See `gtd-methodology.md` for four criteria model
+- **Triggered by:** "plan my day", "what should I work on", etc.
 
-### `/daily-closeout` (Reflect Stage)
+### Daily Closeout Workflow (Reflect Stage)
+- **First:** Checks inbox, prompts to process if needed
 - Reviews what was accomplished
 - Updates project completion status
-- Prepares tomorrow's focus
+- Prepares tomorrow's focus (DRAFT plan)
+- **Triggered by:** "review my day", "daily closeout", etc.
 
 ---
 
@@ -386,17 +445,22 @@ From meeting notes:
 
 ---
 
-## Command Summary
+## Workflow Summary
 
-Our simple 5-command workflow implements full GTD:
+Our system implements full GTD with 2 commands + 3 workflows:
 
-1. `/setup` - Initial configuration
-2. `/capture` - Get it out of your head (Capture)
-3. `/process-inbox` - Clarify, organize, review (Clarify + Organize + Reflect)
-4. `/daily-plan` - Choose what to work on (Engage)
-5. `/daily-closeout` - Daily reflection and prep (Reflect)
+### Commands (User-Invoked)
+1. `/setup` - Initial configuration (one-time)
+2. `/capture` - Get it out of your head (Capture stage) - anytime
 
-**That's it!** Simple commands, powerful GTD methodology underneath.
+### Workflows (Model-Invoked via This Skill)
+3. **Process Inbox** - Clarify, organize, review (Clarify + Organize + Reflect stages)
+4. **Daily Plan** - Choose what to work on (Engage stage)
+5. **Daily Closeout** - Daily reflection and prep (Reflect stage)
+
+**Key Innovation:** Daily plan and closeout workflows automatically check inbox first and prompt user to process if needed. This ensures inbox zero before planning or reviewing.
+
+**That's it!** Simple interface, powerful GTD methodology underneath.
 
 ---
 

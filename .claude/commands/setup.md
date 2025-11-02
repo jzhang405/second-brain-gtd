@@ -4,118 +4,98 @@ description: Interactive step-by-step setup to configure your Second Brain syste
 
 # Second Brain Setup
 
-Welcome! I'm your assistant. Let me help you set up your Second Brain system with a few quick questions.
+Welcome! I'm your assistant. Let me help you set up your Second Brain system.
 
 ---
 
 ## Your Task
 
-Guide the user through a conversational, step-by-step setup. **Ask ONE question at a time. Wait for response. Then next question.**
+Guide the user through setup with ONE question at a time.
 
-**Total time:** ~10 minutes
-**Approach:** Progressive, not overwhelming
-
----
-
-## Setup Flow
-
-### Step 0: Detect Vault Folder (CRITICAL - DO THIS FIRST!)
-
-> **CRITICAL:** Commands need to know which folder is your Obsidian vault. Detect it before anything else.
-
-**Scan for vault folders:**
-
-Use Glob to find folders that contain:
-- `.obsidian` subfolder (Obsidian vault marker)
-- OR `Templates/` subfolder (our vault structure)
-
-**Count results:**
-
-**If exactly 1 vault found:**
-```
-✓ Found your vault folder: {{FolderName}}
-
-I'll configure all commands to work with this vault.
-```
-- Store vault name for later steps
-- No user interaction needed
-
-**If 0 vaults found:**
-```
-I'm looking for your Obsidian vault folder, but I don't see one yet.
-
-The vault folder should be named something like:
-- ObsidianVault
-- General
-- MyVault
-- SecondBrain
-
-What would you like to name your vault folder?
-```
-- Wait for user response
-- Use their provided name
-- Will create the folder in later steps
-
-**If multiple vaults found:**
-```
-I found multiple potential vault folders:
-
-{{List each folder name}}
-
-Which one should I use for your Second Brain?
-```
-- Wait for user selection
-- Use selected folder name
-
-**Store the vault folder name in a variable for all subsequent steps.**
+**There are TWO possible flows based on setupComplete flag:**
+- **Flow A:** setupComplete = false → Full setup (first time)
+- **Flow B:** setupComplete = true → Update existing setup
 
 ---
 
-### Step 0b: Update Command Files with Vault Name
+## Step 0: Determine Flow (CHECK FIRST!)
 
-**If vault name is NOT "ObsidianVault":**
-
-Need to update all command files to use the correct vault name.
-
-**Update these files:**
-1. `.claude/commands/capture.md`
-2. `.claude/commands/process-inbox.md`
-3. `.claude/commands/daily-plan.md`
-4. `.claude/commands/daily-closeout.md`
-
-**For each file:**
-1. Read the file
-2. Replace ALL instances of `ObsidianVault/` with `{{ActualVaultName}}/`
-3. Write back
-
-**Also create/update:** `.claude/vault-config.json`
+**Read:** `.claude/vault-config.json`
 
 ```json
 {
-  "vaultFolder": "{{ActualVaultName}}",
-  "setupDate": "{{YYYY-MM-DD}}",
-  "setupComplete": true,
-  "userName": "{{Will be filled in Step 2}}"
+  "vaultFolder": "ObsidianVault",
+  "setupDate": "",
+  "setupComplete": false,
+  "userName": "",
+  "userContext": "Permanent Notes/Assisting-User-Context.md"
 }
 ```
 
-**Inform user:**
-```
-✓ Configured all commands to work with your vault: {{VaultName}}
+**Check the `setupComplete` field:**
 
-All files will be saved in the correct location!
-```
+**If setupComplete = false:**
+- This is FIRST-TIME SETUP
+- Continue to **FLOW A: Full Setup** below
 
-**If vault name IS "ObsidianVault":**
-- No command updates needed (already correct)
-- Still create/update vault-config.json with vault name
-- Inform user configuration is complete
+**If setupComplete = true:**
+- This is RE-RUN / UPDATE
+- Continue to **FLOW B: Update Setup** below
 
 ---
 
-### Step 1: Welcome and Introduction
+# FLOW A: Full Setup (setupComplete = false)
 
-Greet the user warmly:
+User is setting up for the first time.
+
+---
+
+## Step 1: Detect Vault Folder
+
+**Read vault-config.json to get current vaultFolder** (default: "ObsidianVault")
+
+**Scan root directory for other potential vaults:**
+
+Use Glob or ls to find folders containing:
+- `.obsidian/` subfolder (Obsidian vault marker)
+
+**If ONLY "ObsidianVault" found (or no other vaults):**
+```
+✓ Using vault folder: ObsidianVault
+
+I'll configure the system to work with this vault.
+```
+- Use "ObsidianVault" as vaultFolder
+- Continue to Step 2
+
+**If OTHER vaults found beyond ObsidianVault:**
+```
+I see the default vault folder is set to "ObsidianVault", but I detected other vaults in this directory:
+
+- ObsidianVault (default example vault)
+- {{Other vault 1}}
+- {{Other vault 2}}
+
+Would you like to:
+1. Use ObsidianVault (the example vault)
+2. Use {{Other vault 1}}
+3. Use {{Other vault 2}}
+
+Which vault should I configure your Second Brain in?
+```
+
+**Wait for user selection.**
+
+**Update vault-config.json with selected vault:**
+- Read `.claude/vault-config.json`
+- Update `vaultFolder` field with selected name
+- Write back
+
+**Store vault folder name for all remaining steps.**
+
+---
+
+## Step 2: Welcome and Introduction
 
 ```
 Welcome to your Second Brain setup! 🧠
@@ -132,15 +112,13 @@ Then I'll create your personalized system and you'll be ready to start!
 Sound good? Ready to begin?
 ```
 
-**Wait for user confirmation (y/n or any positive response).**
+**Wait for confirmation.**
 
 ---
 
-### Step 2: Get to Know Them (Two-Part Question Flow)
+## Step 3: Get to Know Them (Two-Part Questions)
 
-#### Step 2a: Warm-Up Question - Who They Are
-
-**Ask about them as a person - name, career, family, goals:**
+### Step 3a: Who They Are
 
 ```
 To set up the system and assist you properly, I need to know a bit about you.
@@ -148,31 +126,29 @@ To set up the system and assist you properly, I need to know a bit about you.
 Tell me about yourself - your name, what you do, family situation, and what you're working toward.
 
 For example:
-- "I'm John, a software engineer, married with two kids. I'm trying to grow my freelance business while staying healthy and being present with family. The website for my freelance busines is www.example.com. I'm also trying to get healthier and lower my stress levels."
+- "I'm John, a software engineer, married with two kids. I'm trying to grow my freelance business while staying healthy and being present with family."
 
-- "I'm Sarah, running a small consulting firm, single, focused on scaling my business and learning new skills. I usually have a lot of things going on and I'm trying to get things more organized, create repeatable systems for my business, so that I can spend more time enjoying nature and the outdoors on mini vacations throughout the year."
+- "I'm Sarah, running a small consulting firm, single, focused on scaling my business and learning new skills. I'm trying to get things more organized."
 
 Just share whatever feels relevant - the more you can share the better context I will have.
 ```
 
-**Wait for their response.**
+**Wait for response.**
 
-**Extract from their response:**
-- Name (for personalization!)
+**Extract:**
+- Name
 - Career/work context
 - Family situation
 - Goals and what they're working toward
-- Priorities and focus areas
 
-**Also update vault-config.json with their name:**
-
-Read `.claude/vault-config.json`, update `userName` field with their name, write back.
+**Update vault-config.json with userName:**
+- Read `.claude/vault-config.json`
+- Update `userName` field
+- Write back
 
 ---
 
-#### Step 2b: Work Style and Schedule - How They Work
-
-**Now ask about their work style, schedule, and preferences:**
+### Step 3b: How They Work
 
 ```
 Great! Now let me understand how you like to work so I can assist you better.
@@ -190,61 +166,31 @@ Tell me about your typical schedule and work preferences:
   - Morning vs. evening productivity?
   - Prefer structured plans or flexible lists?
 
-For example:
-- "I work Monday-Friday, 9-5 with lunch at noon. I prefer quick, actionable suggestions. I do my best work in the morning with 2-hour focus blocks."
-- "I work irregular hours across 7 days, usually 6-8 hour days. I like detailed explanations so I understand the 'why'. I'm a night owl and prefer flexible lists over rigid schedules."
-
 Share whatever helps me understand your rhythm and preferences!
 ```
 
-**Wait for their response.**
+**Wait for response.**
 
-**Extract from their response:**
-- Work days and hours
-- Break times (lunch, etc.)
-- Communication preferences (quick/detailed, directive/collaborative)
-- Energy patterns (morning/evening, focus blocks/task switching)
-- Planning preferences (structured/flexible)
-- Any other work style details
-
-**This becomes the foundation for:**
-- Creating Assisting-User-Context.md (includes work style section)
-- Daily planning adaptations (respecting their schedule)
-- Communication style adjustments
-- Understanding when they're available/focused
-- Personalizing future interactions
+**Extract:**
+- Work schedule
+- Break times
+- Communication preferences
+- Energy patterns
+- Planning preferences
 
 ---
 
-### Step 3: Create Their Personal Context File
+## Step 4: Create Personal Context File
 
-**Behind the scenes** (don't overwhelm user with details):
+**File:** `{{vaultFolder}}/Permanent Notes/Assisting-User-Context.md`
 
-**File:** `{{VaultFolder}}/Permanent Notes/Assisting-User-Context.md`
+**Use template:** `{{vaultFolder}}/Templates/User Context.md`
 
-**Note:** Use the vault folder name detected in Step 0. Throughout all remaining steps, use `{{VaultFolder}}/` instead of hardcoding "ObsidianVault/".
-
-**Use the User Context template:** `{{VaultFolder}}/Templates/User Context.md`
-
-**Fill out from Step 2a and 2b responses:**
-
-**From Step 2a (Who They Are):**
+**Fill from Step 3 responses:**
 - Name, role, family situation
-- One-sentence summary of their primary focus
-- 6-month, 3-month, 1-month goals (extract from what they shared)
-
-**From Step 2b (Work Style):**
-- Work schedule (days, hours, breaks)
-- Energy patterns (peak productivity, low energy times, focus style)
-- Planning preferences (structured vs flexible)
-- Communication preferences (quick/detailed, directive/collaborative)
-- Assistant behavior guidelines
-
-**Structure to create:**
-1. Main hub file: `Assisting-User-Context.md` with all the above
-2. **Do NOT create Work Context files yet** - those will be created as needed when user sets up businesses/projects
-
-**Don't show them the file contents** - just confirm it was created.
+- Goals (6-month, 3-month, 1-month)
+- Work schedule, energy patterns
+- Communication and planning preferences
 
 **Inform user:**
 ```
@@ -261,58 +207,34 @@ This helps me:
 
 ---
 
-### Step 4: Create Default Areas (Inform, Don't Ask)
+## Step 5: Create Default Areas
 
-**Create these 5 default areas automatically:**
+**Create these 5 areas automatically (if don't exist):**
 
-1. **File:** `ObsidianVault/02-Areas/Career-Development.md`
-   - Use Area Template
-   - Purpose: "Professional growth, skills, networking, career advancement"
-   - Leave task sections empty
+1. `{{vaultFolder}}/02-Areas/Career-Development.md`
+2. `{{vaultFolder}}/02-Areas/Health-Fitness.md`
+3. `{{vaultFolder}}/02-Areas/Personal-Development.md`
+4. `{{vaultFolder}}/02-Areas/Errands.md`
+5. `{{vaultFolder}}/02-Areas/Personal-Todos.md`
 
-2. **File:** `ObsidianVault/02-Areas/Health-Fitness.md`
-   - Use Area Template
-   - Purpose: "Physical health, mental wellness, fitness, and self-care"
-   - Leave task sections empty
+**Use Area Template for each, leave task sections empty.**
 
-3. **File:** `ObsidianVault/02-Areas/Personal-Development.md`
-   - Use Area Template
-   - Purpose: "Learning, hobbies, personal growth, and development"
-   - Leave task sections empty
-
-4. **File:** `ObsidianVault/02-Areas/Errands.md`
-   - Use Area Template
-   - Purpose: "Shopping, errands, things to buy or pick up"
-   - Leave task sections empty
-
-5. **File:** `ObsidianVault/02-Areas/Personal-Todos.md`
-   - Use Area Template
-   - Purpose: "Miscellaneous one-off personal tasks and to-dos"
-   - Leave task sections empty
-
-**Then inform user:**
-
+**Inform:**
 ```
 ✅ Created your default areas for organizing tasks:
 
-- Career & Work - Professional stuff
-- Health & Fitness - Health, exercise, wellness
-- Personal Growth - Learning, hobbies
-- Errands & Shopping - Things to buy
-- Personal Todos - Random one-off tasks
+- Career & Work
+- Health & Fitness
+- Personal Growth
+- Errands & Shopping
+- Personal Todos
 
-These give you organized places for all those one-off tasks like "call dentist" or "order replacement filter."
-
-(You can customize these later if needed!)
+These give you organized places for one-off tasks.
 ```
-
-**Don't wait for response - just inform and move on.**
 
 ---
 
-### Step 5: Important People (CRITICAL for Relationships)
-
-**Now ask about people:**
+## Step 6: Important People
 
 ```
 Now let's set up relationship tracking for important people in your life.
@@ -325,17 +247,16 @@ Think about:
 - Family members you coordinate with often
 - Mentors, advisors, or clients
 
-List 2-5 people (first name or "John Smith" format, one per line):
+List 2-5 people (first name or "John Smith" format), or say "skip":
 ```
 
-**Wait for their list.**
+**Wait for response.**
 
 **If they provide names:**
 
-For EACH person they listed, ask:
-
+For EACH person:
 ```
-For {{Person 1 from their list}}:
+For {{Person}}:
 
 What's your relationship?
 - business-partner
@@ -346,43 +267,25 @@ What's your relationship?
 - friend
 ```
 
-**Wait for response.**
-
-**Then create relationship note:**
-
-1. **File:** `ObsidianVault/02-Areas/Relationships/{{Person-Name}}.md`
-2. Use Relationship Note template
-3. Fill in:
-   - Title: Person's name
-   - Relationship type: from their response
-   - Leave task sections empty (user will add as they capture)
-
-**Repeat for each person.**
+**Create:** `{{vaultFolder}}/02-Areas/Relationships/{{Person-Name}}.md`
 
 **After all created:**
-
 ```
 ✅ Created relationship notes for:
-- {{Person 1}} ({{relationship type}})
-- {{Person 2}} ({{relationship type}})
-- {{Person 3}} ({{relationship type}})
+- {{Person 1}} ({{type}})
+- {{Person 2}} ({{type}})
 
-When you capture something like "Need to discuss budget with {{Person 1}}", it will automatically route to their relationship note!
+When you capture "Discuss budget with {{Person}}", it will route to their note!
 ```
 
-**If they say "none" or "skip":**
-
+**If "skip":**
 ```
-No problem! You can add relationship notes later when you need them.
-
-The Relationships folder is ready whenever you want to track important people.
+No problem! You can add relationship notes later.
 ```
 
 ---
 
-### Step 6: Create Their First Project
-
-**Ask for one project:**
+## Step 7: Create First Project
 
 ```
 Let's create your first project so you can start using the daily planner.
@@ -390,75 +293,55 @@ Let's create your first project so you can start using the daily planner.
 A "project" in GTD is anything that takes more than one step.
 
 Examples:
-- Small: "Organize garage this weekend" (5-6 steps)
-- Large: "Launch new website" (20+ steps)
+- Small: "Organize garage" (5-6 steps)
+- Large: "Launch website" (20+ steps)
 
 What's ONE thing you're working on right now that has multiple steps?
-
-(Just one for now - you can add more anytime!)
 ```
 
-**Wait for their response.**
+**Wait for response.**
 
-**Then ask clarifying questions:**
-
+**Ask:**
 ```
-Great! For "{{Their project}}":
+For "{{Their project}}":
 
 1. What does "done" look like?
-
-(Describe the finished state - be specific!)
 ```
 
-**Wait for response.**
+**Wait.**
 
 ```
-2. What's the very next action you could take on this?
-
-(Must be concrete and doable - like "Call John at 555-1234" not just "Contact John")
+2. What's the very next action you could take?
 ```
 
-**Wait for response.**
+**Wait.**
 
-**Determine priority based on their goals:**
+**Create:** `{{vaultFolder}}/01-Projects/{{Project-Name}}.md`
 
-If project relates to their stated 3-6 month goals → priority: high
-Otherwise → priority: medium
+**Fill in:**
+- Desired Outcome
+- First next action in High Priority section
+- Status: active
+- Priority: high (if aligns with goals) or medium
 
-**Create the project:**
-
-1. **File:** `ObsidianVault/01-Projects/{{Project-Name}}.md`
-2. Use Project Template
-3. Fill in:
-   - Title
-   - Desired Outcome (from their answer to Q1)
-   - High Priority Next Actions section: Add their first next action (from Q2)
-   - Status: active
-   - Priority: high or medium (based on goal alignment)
-   - Why It Matters: Connect to their 3-6 month goals
-
-**Then offer option:**
-
+**Offer:**
 ```
 ✅ Created: [[{{Project Name}}]]
 
-Want to add one more project, or is this good to start?
-
-1. Add one more project
-2. That's good - let's move on
+Want to add another project?
+1. Yes - add another
+2. No - let's finish up
 ```
 
-**If Option 1:** Repeat questions for second project (max 2 projects total)
-**If Option 2:** Move to Step 7
+**Allow multiple projects.**
 
 ---
 
-### Step 7: Create Folder Structure (Behind Scenes)
+## Step 8: Ensure Folder Structure
 
-Verify all folders exist. Create any missing:
-
+Create any missing folders:
 ```
-ObsidianVault/
+{{vaultFolder}}/
 ├── 00-Inbox/Daily/
 ├── 00-Inbox/Fleeting-Notes/
 ├── 01-Projects/
@@ -472,16 +355,15 @@ ObsidianVault/
 └── Templates/
 ```
 
-**Don't mention this to user** - just do it.
+**Don't mention to user - just do it.**
 
 ---
 
-### Step 8: Create _Context.md File
+## Step 9: Create _Context.md
 
-**File:** `ObsidianVault/_Context.md`
+**File:** `{{vaultFolder}}/_Context.md`
 
-**Content:**
-
+**Structure:**
 ```markdown
 ---
 title: "_Context"
@@ -498,113 +380,43 @@ tags:
 
 **Last Updated:** {{YYYY-MM-DD}}
 
-> System state and current priorities
-
----
-
 ## Active Projects
-
-{{List projects created}}
-
-- [[{{Project 1}}]] - {{Desired outcome}}
-- [[{{Project 2}}]] - {{Desired outcome}} (if created)
-
----
+- [[{{Project 1}}]] - {{Outcome}}
 
 ## Key Relationships
-
-{{List people created}}
-
-- [[{{Person 1}}]] ({{relationship type}})
-- [[{{Person 2}}]] ({{relationship type}})
-
----
+- [[{{Person 1}}]] ({{type}})
 
 ## Top Priorities
-
-{{From their goals response}}
-
-1. {{Priority 1 from their 3-6 month goals}}
+1. {{Priority from user goals}}
 2. {{Priority 2}}
 3. {{Priority 3}}
 
----
-
 ## Notes for Assistant
-
-**User Focus:** {{Their 3-6 month goals in brief}}
+**User Focus:** {{Goals brief}}
 **Setup Date:** {{YYYY-MM-DD}}
 ```
 
-**Don't show user** - just create it.
-
 ---
 
-### Step 9: Create Welcome README
+## Step 10: Update vault-config.json
 
-**File:** `ObsidianVault/README.md`
+**Update setup completion:**
 
-```markdown
-# Welcome to Your Second Brain! 🧠
-
-Setup completed {{YYYY-MM-DD}}
-
-## What You Have
-
-✅ **5 Default Areas** - Organized places for one-off tasks
-✅ **{{N}} Relationship Notes** - Track important people
-✅ **{{N}} Projects** - Ready to work on
-✅ **Personal Context** - Your goals captured in `Permanent Notes/Assisting-User-Context.md`
-✅ **Complete folder structure** - Everything organized
-
----
-
-## Quick Start
-
-See: `START HERE - First Week Guide.md` for your first week checklist!
-
-### The Core Loop
-
-1. **Capture:** `/capture` - Get thoughts out of your head (anytime)
-2. **Process:** `/process-inbox` - Organize captures (3x/week)
-3. **Plan:** `/daily-plan` - Choose what to work on (every morning)
-4. **Closeout:** `/daily-closeout` - Review and prep tomorrow (every evening)
-
----
-
-## Your Setup
-
-**Projects:**
-- [[{{Project 1}}]] - {{One-line description}}
-- [[{{Project 2}}]] - {{One-line description}}
-
-**Areas:**
-- Career-Development
-- Health-Fitness
-- Personal-Development
-- Errands
-- Personal-Todos
-
-**Relationships:**
-- {{Person 1}} ({{type}})
-- {{Person 2}} ({{type}})
-
----
-
-## Next Steps
-
-1. Start capturing: `/capture [your first thought]`
-2. Tomorrow morning: `/daily-plan`
-3. Open in Obsidian (download from obsidian.md)
-
-You're all set! Let's build your Second Brain. 🚀
+```json
+{
+  "vaultFolder": "{{ActualVaultUsed}}",
+  "setupDate": "{{YYYY-MM-DD}}",
+  "setupComplete": true,
+  "userName": "{{From Step 3}}",
+  "userContext": "Permanent Notes/Assisting-User-Context.md"
+}
 ```
 
+**This marks setup as complete.**
+
 ---
 
-### Step 10: Completion Summary
-
-Provide encouraging summary:
+## Step 11: Completion Summary
 
 ```
 ✅ SETUP COMPLETE!
@@ -615,66 +427,33 @@ I've created your personalized Second Brain system:
 - Full PARA organization (Projects, Areas, Resources, Archives)
 - Inbox for captures
 - Daily Plans folder
-- Templates ready to use
 
 📝 **Your Personal Context**
-- Saved your goals in: `Permanent Notes/Assisting-User-Context.md`
-- I'll reference this to help prioritize your work
+- Saved your goals in: Permanent Notes/Assisting-User-Context.md
 
-📋 **Your First {{N}} Projects**
-- [[{{Project 1}}]] - {{Desired outcome}}
-- [[{{Project 2}}]] - {{Desired outcome}}
-- Each has a clear outcome and first next action
+📋 **{{N}} Projects**
+- [[{{Project 1}}]] - {{Outcome}}
+- [[{{Project 2}}]] - {{Outcome}}
 
-🤝 **{{N}} Relationship Notes Created**
+🤝 **{{N}} Relationship Notes**
 - {{Person 1}} ({{type}})
 - {{Person 2}} ({{type}})
-- Track conversations and commitments
 
-🗂️ **5 Default Areas for One-Off Tasks**
-- Career-Development
-- Health-Fitness
-- Personal-Development
-- Errands
-- Personal-Todos
+🗂️ **5 Default Areas**
+- Career, Health, Personal Dev, Errands, Personal Todos
 
 ---
 
 ## What's Next?
 
-**Right now:**
-1. Start capturing your thoughts:
-   ```
-   /capture [anything on your mind]
-   ```
+1. `/capture [anything on your mind]` - Start capturing
+2. `/daily-plan` - Plan your day tomorrow morning
+3. `/process-inbox` - Organize captures (3x/week)
+4. `/daily-closeout` - Review each evening
 
-**Tomorrow morning:**
-2. Plan your day:
-   ```
-   /daily-plan
-   ```
-   You already have projects and areas, so this will generate a real plan!
+📖 Check out: `START HERE - First Week Guide.md` in your vault!
 
-**This week:**
-3. Process your captures (3x this week):
-   ```
-   /process-inbox
-   ```
-
-**Every evening:**
-4. Review your day:
-   ```
-   /daily-closeout
-   ```
-
----
-
-📖 **New User?** Check out: `START HERE - First Week Guide.md` in your vault for a day-by-day checklist!
-
-🎯 **Ready to open in Obsidian?**
-- Download Obsidian from https://obsidian.md
-- Open the `ObsidianVault` folder as a vault
-- See your system come to life!
+🎯 Open `{{vaultFolder}}` in Obsidian (download from obsidian.md)
 
 ---
 
@@ -683,33 +462,338 @@ Your Second Brain is ready. Let's get things done! 🚀
 
 ---
 
-## Important Implementation Notes
+# FLOW B: Update Setup (setupComplete = true)
 
-**Question pacing:**
-- ONE question at a time
-- Wait for response before next question
-- Keep questions simple and concrete
-- Provide examples for clarity
-- Don't ask about things you can auto-create (like default areas)
-
-**What to auto-create:**
-- Default 5 areas (Career, Health, Personal Dev, Errands, Personal Todos)
-- Folder structure
-- _Context.md
-- README
-
-**What to ask about:**
-- Their 3-6 month goals (ONE combined question)
-- Important people (2-5 names + relationship types)
-- First project (ONE project, with outcome + next action)
-- Optional second project
-
-**Behind the scenes:**
-- Use their goals response to create Assisting-User-Context.md
-- Use their people list to create relationship notes
-- Use their project response to create first project(s)
-- Connect everything (_Context.md tracks it all)
+User has already completed setup and is re-running the command.
 
 ---
 
-Now run the guided setup process!
+## Step 1: Load Existing Configuration
+
+**Read `.claude/vault-config.json`:**
+- Extract vaultFolder, setupDate, userName
+
+**Read user context:** `{{vaultFolder}}/Permanent Notes/Assisting-User-Context.md`
+
+**Scan existing setup:**
+- Count area files in `{{vaultFolder}}/02-Areas/`
+- Count relationship notes in `{{vaultFolder}}/02-Areas/Relationships/`
+- Count active projects in `{{vaultFolder}}/01-Projects/` (status: active)
+
+---
+
+## Step 2: Show Summary and Ask What to Update
+
+```
+📊 EXISTING SETUP DETECTED
+
+Your Second Brain is already configured!
+
+**Vault:** {{vaultFolder}}
+**Setup Date:** {{setupDate}}
+**User:** {{userName}}
+
+**Current Configuration:**
+- {{N}} Active Projects: {{list project names}}
+- {{N}} Relationship Notes: {{list people names}}
+- 5 Default Areas (Career, Health, Personal Dev, Errands, Personal Todos)
+
+**Your Current Goals (from Assisting-User-Context.md):**
+{{Extract and show brief summary:}}
+- 6-month: {{goal}}
+- 3-month: {{goal}}
+- 1-month: {{goal}}
+
+**Work Style:**
+- Schedule: {{from context}}
+- Energy: {{from context}}
+- Preferences: {{from context}}
+
+---
+
+Would you like to update anything?
+
+1. Update personal information (goals, work style, preferences)
+2. Add more relationship notes
+3. Add more projects
+4. Switch to a different vault folder
+5. No changes needed (exit)
+
+What would you like to do?
+```
+
+**Wait for user selection.**
+
+---
+
+## Step 3: Handle Update Request
+
+**If Option 1 (Update personal information):**
+
+```
+What would you like to update in your personal context?
+
+Current goals:
+- 6-month: {{goal}}
+- 3-month: {{goal}}
+- 1-month: {{goal}}
+
+Current work style:
+- {{summary}}
+
+Tell me what you'd like to change, or provide updated information.
+```
+
+**Wait for response.**
+
+**Update Assisting-User-Context.md:**
+- Read existing file
+- Update ONLY the sections user mentioned
+- Use Edit tool (targeted changes)
+- Keep rest unchanged
+
+**Confirm:**
+```
+✅ Updated your personal context!
+
+Changes made:
+- {{List what was updated}}
+
+Anything else you'd like to update?
+```
+
+---
+
+**If Option 2 (Add relationship notes):**
+
+```
+Who would you like to add? (name and relationship type)
+```
+
+**For each person:**
+- Check if `{{vaultFolder}}/02-Areas/Relationships/{{Person}}.md` exists
+- If exists: "{{Person}} already has a note - skipping"
+- If not: Create using Relationship Note template
+
+**Confirm:**
+```
+✅ Added relationship notes:
+- {{Person 1}} ({{type}})
+- {{Person 2}} ({{type}})
+
+Anything else you'd like to update?
+```
+
+---
+
+**If Option 3 (Add projects):**
+
+```
+What project would you like to add?
+```
+
+**Ask:**
+1. What does "done" look like?
+2. What's the next action?
+
+**Create:** `{{vaultFolder}}/01-Projects/{{Project-Name}}.md`
+
+**Confirm:**
+```
+✅ Created project: [[{{Project}}]]
+
+Want to add another project or update something else?
+```
+
+---
+
+**If Option 4 (Switch vault folder):**
+
+**Scan for other vaults in root directory.**
+
+```
+Available vaults in this directory:
+- ObsidianVault (currently selected)
+- {{Other vault 1}}
+- {{Other vault 2}}
+
+Which vault would you like to switch to?
+```
+
+**Update vault-config.json:**
+- Change `vaultFolder` to selected vault
+- Update `setupDate` to today
+- Write back
+
+**Confirm:**
+```
+✅ Switched to vault: {{NewVault}}
+
+All future commands will use this vault.
+
+Anything else you'd like to update?
+```
+
+---
+
+**If Option 5 (No changes):**
+
+```
+Your setup is unchanged. You're all set!
+```
+
+Exit gracefully.
+
+---
+
+## Step 4: After Any Update
+
+**Update vault-config.json:**
+```json
+{
+  "vaultFolder": "{{Current}}",
+  "setupDate": "{{Original}}",
+  "setupComplete": true,
+  "userName": "{{Current}}",
+  "userContext": "Permanent Notes/Assisting-User-Context.md",
+  "lastModified": "{{YYYY-MM-DD}}"
+}
+```
+
+**Update _Context.md:**
+- Update "Last Updated" date
+- Update active projects list
+- Update relationships list
+- Update priorities if goals changed
+
+**Final confirmation:**
+```
+✅ SETUP UPDATED!
+
+Changes applied:
+- {{List what was changed}}
+
+📊 Current System:
+- {{N}} Active Projects
+- {{N}} Relationship Notes
+- 5 Default Areas
+- Updated: {{YYYY-MM-DD}}
+
+You're all set! Continue using:
+- `/capture` - Capture thoughts
+- `/daily-plan` - Plan your day
+- `/daily-closeout` - Review and prep
+```
+
+---
+
+# FLOW A: Full Setup Steps (Continued)
+
+## Step 3: Get to Know Them
+[Same as above - Step 3a and 3b]
+
+## Step 4: Create Personal Context File
+[Same as above - create new file using template]
+
+## Step 5: Create Default Areas
+[Same as above - create 5 areas]
+
+## Step 6: Important People
+[Same as above - create relationship notes]
+
+## Step 7: Create First Project
+[Same as above - create at least one project]
+
+## Step 8: Ensure Folder Structure
+[Same as above - create all folders]
+
+## Step 9: Create _Context.md
+[Same as above - create system context]
+
+## Step 10: Mark Setup Complete
+
+**Update vault-config.json:**
+```json
+{
+  "vaultFolder": "{{ActualVaultUsed}}",
+  "setupDate": "{{YYYY-MM-DD}}",
+  "setupComplete": true,
+  "userName": "{{From Step 3}}",
+  "userContext": "Permanent Notes/Assisting-User-Context.md"
+}
+```
+
+**This is critical** - marks setup as done so re-runs use Update flow.
+
+---
+
+## Step 11: Completion Summary
+
+```
+✅ SETUP COMPLETE!
+
+I've created your personalized Second Brain system:
+
+📁 **Folder Structure**
+- Full PARA organization (Projects, Areas, Resources, Archives)
+- Inbox for captures
+- Daily Plans folder
+
+📝 **Your Personal Context**
+- Saved your goals in: Permanent Notes/Assisting-User-Context.md
+
+📋 **{{N}} Projects**
+- [[{{Project 1}}]] - {{Outcome}}
+
+🤝 **{{N}} Relationship Notes**
+- {{Person 1}} ({{type}})
+
+🗂️ **5 Default Areas**
+- Career, Health, Personal Dev, Errands, Personal Todos
+
+---
+
+## What's Next?
+
+1. `/capture [your first thought]` - Start capturing
+2. `/daily-plan` - Plan your day tomorrow morning
+3. `/process-inbox` - Organize captures (3x/week)
+4. `/daily-closeout` - Review each evening
+
+📖 Check: `START HERE - First Week Guide.md` in your vault
+
+🎯 Open `{{vaultFolder}}` folder in Obsidian (download from obsidian.md)
+
+---
+
+Your Second Brain is ready. Let's get things done! 🚀
+```
+
+---
+
+## Important Notes
+
+**Vault detection:**
+- ONLY scans for other vaults if setupComplete = false (first-time setup)
+- Asks user to choose if multiple vaults found
+- Default is ObsidianVault (the example vault)
+
+**setupComplete flag:**
+- false → Full setup flow
+- true → Update flow
+
+**No conditional logic in every step:**
+- Two separate, clean flows
+- Simple fork at the beginning
+- Much easier to maintain
+
+**Update flow is simple:**
+- Read existing config and context
+- Show summary
+- Ask what to update
+- Update only what user specifies
+- Done
+
+---
+
+Now run the setup process!
