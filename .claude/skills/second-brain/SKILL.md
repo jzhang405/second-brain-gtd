@@ -1,18 +1,7 @@
 ---
-name: Second Brain
+name: second-brain
 description: |
-  Personal knowledge management and productivity system combining GTD (Getting Things Done), Zettelkasten note-taking, and PARA organization for Obsidian vaults.
-
-  Use this skill when:
-  - User wants to capture thoughts, ideas, tasks, or notes ("capture this", "save this thought", "remember this", "note this down", "add to my inbox")
-  - User wants to plan their day ("plan my day", "what should I work on today", "daily planning", "morning planning")
-  - User wants to process their inbox ("process my inbox", "organize my captures", "clarify my tasks", "GTD processing")
-  - User wants to review their day ("daily closeout", "review my day", "end of day review", "evening reflection")
-  - User wants to set up or configure their Second Brain ("set up my second brain", "configure my vault", "second brain setup")
-  - User asks about their projects, tasks, priorities, or goals
-  - User is doing research or brainstorming and might want to preserve insights
-
-  PROACTIVE BEHAVIOR: When the user is researching topics, discussing ideas, or working through problems, offer to capture valuable insights to their Second Brain. Ask: "Would you like me to capture this insight to your Second Brain?"
+  Personal knowledge management and productivity system combining GTD, Zettelkasten, and PARA for Obsidian vaults. Use when user says: "capture this", "save this thought", "remember this", "plan my day", "what should I work on", "process my inbox", "organize my captures", "daily closeout", "review my day", "set up my second brain", or asks about projects, tasks, priorities, or goals. Proactively offer to capture valuable insights during research or brainstorming.
 ---
 
 # Second Brain
