@@ -6,24 +6,23 @@ Process all inbox items using GTD principles: clarify what each item means, orga
 
 ---
 
-## Context
+## Configuration Check
 
-**CRITICAL FIRST STEP:** Read `.claude/vault-config.json` to get the vault folder name.
+**CRITICAL FIRST STEP:** Read `~/.second-brain/config.json` to get the vault path.
 
-**If vault-config.json doesn't exist:**
-- User hasn't run `/setup` yet
-- Respond: "Please run `/setup` first to configure your Second Brain!"
-- Do not proceed
+**If config doesn't exist:**
+- User hasn't run setup yet
+- Respond: "Let's set up your Second Brain first so I know where to organize things."
+- Run [setup workflow](setup.md)
 
-**Extract `vaultFolder` value and use it for all paths in this workflow.**
+**Extract `vaultPath` value and use it for all paths in this workflow.**
 
 ---
 
 **Then read these files:**
-1. `.claude/skills/gtd-workflow/references/gtd-methodology.md` - Core GTD principles
-2. `.claude/skills/obsidian-mastery/SKILL.md` - Obsidian conventions
-3. `{{vaultFolder}}/_Context.md` - Current system state (if exists)
-4. `{{vaultFolder}}/Permanent Notes/Assisting-User-Context.md` - User's goals
+1. [GTD Methodology Reference](../references/gtd-methodology.md) - Core GTD principles
+2. `{{vaultPath}}/_Context.md` - Current system state (if exists)
+3. `{{vaultPath}}/Permanent Notes/Assisting-User-Context.md` - User's goals
 
 ---
 
@@ -36,8 +35,8 @@ Process all inbox items using GTD principles: clarify what each item means, orga
 ### Step 1: Scan All Inbox Locations
 
 **Scan these folders:**
-- `{{vaultFolder}}/00-Inbox/Daily/` - Daily captures
-- `{{vaultFolder}}/00-Inbox/Fleeting-Notes/` - Fleeting notes (if any)
+- `{{vaultPath}}/00-Inbox/Daily/` - Daily captures
+- `{{vaultPath}}/00-Inbox/Fleeting-Notes/` - Fleeting notes (if any)
 
 **List all items found:**
 - Count total captures across all files
@@ -77,7 +76,7 @@ Please provide any additional context that will help me organize these properly.
 
 ### Step 3: Process Each Item Using GTD
 
-For EACH capture, apply the GTD clarifying questions (from gtd-methodology.md):
+For EACH capture, apply the GTD clarifying questions:
 
 **Question 1: What is it?**
 - Understand the capture
@@ -105,10 +104,6 @@ For EACH capture, apply the GTD clarifying questions (from gtd-methodology.md):
 ---
 
 ### Step 4: Determine Priority FIRST
-
-**Before routing, determine priority level using the priority determination logic from the main gtd-workflow SKILL.md:**
-
-**Reference:** See "Determining Task Priority" section in main SKILL.md
 
 **For each task, check:**
 
@@ -142,78 +137,35 @@ For EACH capture, apply the GTD clarifying questions (from gtd-methodology.md):
    - Errand/shopping? → `02-Areas/Errands.md`
    - Work/career? → `02-Areas/Career-Development.md`
    - Learning? → `02-Areas/Personal-Development.md`
-   - About a specific person? → See "For Relationship Items" below
+   - About a specific person? → `02-Areas/Relationships/{{Person}}.md`
 
-2. **Add to appropriate section based on priority (from Step 4):**
-   - Priority: HIGH → "High Priority" or "High Priority Tasks" section
-   - Priority: NEXT ACTION → "Next Actions" or "Current Tasks" section
+2. **Add to appropriate section based on priority:**
+   - Priority: HIGH → "High Priority" section
+   - Priority: NEXT ACTION → "Next Actions" section
    - Priority: SOMEDAY → "Someday/Maybe" section
 
 3. **Format:** `- [ ] {{Action}} #context/X #energy/X #time/Xm`
 
-**Example routing:**
-- "Call John ASAP about budget" + relates to top goal → Personal-Todos → High Priority section
-- "Buy groceries this week" → Errands → Next Actions section
-- "Eventually learn Spanish" → Personal-Development → Someday/Maybe section
-
 **For Projects (multi-step outcomes):**
-1. Create new project note in `{{vaultFolder}}/01-Projects/`
-2. Use Project Template
-3. **Determine project priority:**
-   - Relates to user's top 1-3 goals? → priority: high
-   - Has deadline <30 days? → priority: high
-   - Otherwise → priority: medium
-4. Fill out:
+1. Create new project note in `{{vaultPath}}/01-Projects/`
+2. Fill out:
    - Desired Outcome (GTD: what does done look like?)
-   - Next Actions section: Add at least one concrete action (determine priority using Step 4 logic)
-   - Status: active, priority: (from step 3), area: (if applicable)
-5. Move original capture content into project notes section
+   - Next Actions section: Add at least one concrete action
+   - Status: active
+   - Priority: high (if relates to goals) or medium
 
 **For Knowledge/Insights:**
-1. Create fleeting note in `{{vaultFolder}}/00-Inbox/Fleeting-Notes/`
-2. Use Fleeting Note template (from obsidian-mastery skill)
-3. Capture the core thought
-4. Mark for later development into permanent note
-5. **Don't try to create permanent notes now** - that's deep work for later
+1. Create fleeting note in `{{vaultPath}}/00-Inbox/Fleeting-Notes/`
+2. Capture the core thought
+3. Mark for later development into permanent note
 
 **For Reference Information:**
-1. Determine topic
-2. Search for existing related notes using Grep
-3. If exists: Add info to existing note
-4. If not: Create new in `{{vaultFolder}}/03-Resources/Reference-Notes/`
+1. Create/update in `{{vaultPath}}/03-Resources/Reference-Notes/`
 
-**For Relationship Items (About Specific People):**
-
-**Detect if capture mentions a specific person:**
-- "Talk to John about..."
-- "Ask Sarah for..."
-- "Follow up with Mom on..."
-- "Discuss with [business partner name]..."
-
-**If person mentioned:**
-1. Check if relationship note exists: `{{vaultFolder}}/02-Areas/Relationships/{{Person-Name}}.md`
-2. **If exists:**
-   - Determine priority (use Step 4 logic)
-   - Add to appropriate section based on priority:
-     - Priority: HIGH → "High Priority" section
-     - Priority: NEXT ACTION → "Next Actions → To Discuss" subsection
-     - Priority: SOMEDAY → "Someday/Maybe" section
-   - If waiting on them → "Waiting On" section
-3. **If doesn't exist AND person is important (business partner, family, key colleague):**
-   - Create new relationship note using Relationship Note template
-   - Fill in relationship type (business-partner, family, colleague, etc.)
-   - Determine priority and add to appropriate section
-   - Inform user: "Created relationship note for {{Person}}"
-4. **If person is not important/one-off:** Just add as regular task to relevant area
-
-**Example routing with priority:**
-- "Need to discuss Q4 budget with John ASAP" → `Relationships/John.md` → High Priority (ASAP keyword)
-- "Ask Mom about Thanksgiving plans" → `Relationships/Mom.md` → Next Actions (no urgency)
-- "Might talk to Sarah about new tool eventually" → `Relationships/Sarah.md` → Someday/Maybe
-- "Call dentist office tomorrow" → `Health-Fitness.md` → Next Actions (not a relationship note)
-
-**For Trash:**
-1. Delete the capture
+**For Relationship Items:**
+- Check if relationship note exists: `{{vaultPath}}/02-Areas/Relationships/{{Person}}.md`
+- If exists, add to appropriate priority section
+- If doesn't exist and person is important, create relationship note
 
 ---
 
@@ -223,8 +175,7 @@ After processing inbox, do a quick project health check.
 
 ### Step 6: Scan All Active Projects
 
-**Read all files in:**
-- `{{vaultFolder}}/01-Projects/`
+**Read all files in:** `{{vaultPath}}/01-Projects/`
 
 **Check frontmatter for:** `status: active`
 
@@ -243,7 +194,7 @@ For each active project, check:
    - If >7 days: Flag as stalled
 
 3. **Actually completed?**
-   - If status says "done" → Move to `{{vaultFolder}}/04-Archives/`
+   - If all tasks done → Move to `{{vaultPath}}/04-Archives/`
    - Celebrate: "{{Project}} completed!"
 
 4. **Should be someday/maybe?**
@@ -253,20 +204,18 @@ For each active project, check:
 
 ### Step 8: Update System State
 
-**Update `{{vaultFolder}}/_Context.md`:**
+**Update `{{vaultPath}}/_Context.md`:**
 - List of active projects
 - Count of active projects
 - Top 3 priorities
 - Waiting-on items
-
-**If _Context.md doesn't exist, create it with basic structure.**
 
 ---
 
 ## Output Format
 
 ```
-📥 INBOX PROCESSING & REVIEW COMPLETE
+INBOX PROCESSING & REVIEW COMPLETE
 
 ## Inbox Processing
 
@@ -274,16 +223,16 @@ For each active project, check:
 **Items Processed:** {{N}}
 
 {{For each item processed:}}
-✓ "{{Capture}}" → {{Task added to Project X / New project created / Fleeting note created / etc.}}
+- "{{Capture}}" → {{Task added to Project X / New project created / etc.}}
 
 **Summary:**
-- ✅ Projects Created: {{N}}
-- ✅ Tasks Added to Projects: {{N}}
-- ✅ Fleeting Notes Created: {{N}}
-- ✅ Reference Notes Created: {{N}}
-- 🗑️ Items Deleted: {{N}}
+- Projects Created: {{N}}
+- Tasks Added to Projects: {{N}}
+- Fleeting Notes Created: {{N}}
+- Reference Notes Created: {{N}}
+- Items Deleted: {{N}}
 
-**Inbox Status:** ✅ ZERO
+**Inbox Status:** ZERO
 
 ---
 
@@ -295,22 +244,18 @@ For each active project, check:
 **Updates:**
 - [[Project X]] - Added next action
 - [[Project Y]] - Archived (completed!)
-- [[Project Z]] - Flagged as stalled (no update in {{N}} days)
+- [[Project Z]] - Flagged as stalled
 
 {{If projects need attention:}}
-**⚠️ Attention Needed:**
+**Attention Needed:**
 - [[Project A]] - No next action defined
-- [[Project B]] - Stalled {{N}} days - consider moving to someday?
-
-**Projects Archived:** {{N}}
+- [[Project B]] - Stalled {{N}} days
 
 ---
 
-✅ Processing complete!
-✅ Inbox at zero
-✅ All active projects reviewed
+Processing complete! Your inbox is at zero.
 
-💡 Next: Use daily planning workflow to prioritize your work for today.
+Want to plan your day next?
 ```
 
 ---
@@ -327,11 +272,6 @@ For each active project, check:
 - Quick health check, not deep analysis
 - Flag issues, don't try to solve them all now
 - Time-box this: max 10 minutes total for project scan
-- User can deep-dive specific projects later
-
-**Skill coordination:**
-- Use GTD methodology from `references/gtd-methodology.md` for actionable items
-- Use obsidian-mastery skill for note structure (fleeting notes, reference notes, linking)
 
 ---
 
