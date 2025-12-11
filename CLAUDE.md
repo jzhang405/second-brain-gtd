@@ -4,45 +4,50 @@ This file provides guidance to Claude Code when working with this Second Brain s
 
 ---
 
-## 🚨 CRITICAL: Vault Folder Configuration
+## 🚨 CRITICAL: Vault Path Configuration
 
-**ALL Second Brain operations MUST work in the vault folder.**
+**ALL Second Brain operations MUST work in the configured vault path.**
 
-**Vault folder is stored in:** `.claude/vault-config.json`
+**Configuration is stored in:** `~/.second-brain/config.json` (persistent across sessions)
 
-**To find the vault folder:**
-1. Read `.claude/vault-config.json`
-2. Look for `vaultFolder` property
-3. Use that folder name for ALL file operations
+**To find the vault path:**
+1. Read `~/.second-brain/config.json`
+2. Look for `vaultPath` property
+3. Use that path for ALL file operations
 
 **Example:**
 ```json
 {
-  "vaultFolder": "General",
+  "vaultPath": "/Users/yourname/Documents/MyVault",
   "setupDate": "2025-10-25",
   "setupComplete": true,
-  "userName": "Sean"
+  "userName": "Sean",
+  "userContext": "Permanent Notes/Assisting-User-Context.md",
+  "preferences": {
+    "proactiveCapture": true,
+    "inboxThreshold": 5
+  }
 }
 ```
 
 **This means:**
-- If vaultFolder = "General", use `General/00-Inbox/Daily/` (not `ObsidianVault/00-Inbox/Daily/`)
-- If vaultFolder = "MyVault", use `MyVault/00-Inbox/Daily/`
-- etc.
+- All operations use the absolute `vaultPath` from config
+- No need to specify the vault location each session
+- Works for both Claude Code AND Claude Desktop
 
-**NEVER hardcode "ObsidianVault/" paths in your responses.**
+**NEVER hardcode vault paths in your responses.**
 
 **How to use:**
-1. At start of ANY Second Brain command, read `.claude/vault-config.json`
-2. Extract `vaultFolder` value
-3. Use that in all paths: `{{vaultFolder}}/00-Inbox/Daily/`
+1. At start of ANY Second Brain operation, read `~/.second-brain/config.json`
+2. Extract `vaultPath` value
+3. Use that in all paths: `{{vaultPath}}/00-Inbox/Daily/`
 
-**If vault-config.json doesn't exist:**
-- User hasn't run `/setup` yet
-- Prompt them: "Please run `/setup` first to configure your Second Brain"
-- Do not proceed
+**If config.json doesn't exist:**
+- User hasn't run setup yet
+- Prompt them: "Let's set up your Second Brain first. What's the path to your Obsidian vault?"
+- Do not proceed with other operations
 
-**This is configured during `/setup` command (Step 0) and ensures all files are saved in the correct location.**
+**This is configured during setup and persists forever across all sessions.**
 
 ---
 
@@ -53,9 +58,9 @@ This is an Obsidian vault template for creating a Personal Second Brain - a know
 - **GTD (Getting Things Done)** - Task and project management
 - **Zettelkasten** - Atomic note-taking for knowledge building
 - **PARA Method** - Folder organization (Projects, Areas, Resources, Archives)
-- **Claude Integration** - AI-powered commands and automation
+- **Claude Integration** - AI-powered skill with natural language triggers
 
-**This is a generic starter template.** Users customize it during `/setup` to match their specific needs, goals, and workflows.
+**This is a generic starter template.** Users customize it during setup to match their specific needs, goals, and workflows.
 
 ---
 
@@ -120,32 +125,35 @@ ObsidianVault/                    # Vault root
 
 ---
 
-## Custom Commands
+## Second Brain Skill
 
-The system provides AI-powered slash commands for workflow automation.
+The system provides a unified AI-powered skill with natural language triggers. Just talk naturally!
 
-### Core Workflow Commands
+### Natural Language Triggers
 
-#### `/setup`
+#### Setup / Configure
+**Trigger phrases:** "set up my second brain", "configure my vault", "second brain setup"
 **Purpose:** Interactive onboarding to configure the system
-**When:** First-time setup or system reset
+**When:** First-time setup or reconfiguration
 **What it does:**
+- Asks for vault path (saved permanently to `~/.second-brain/config.json`)
 - Asks about user's goals (6-month, 3-month, 1-month)
-- Asks about areas of responsibility
 - Creates `Assisting-User-Context.md` permanent note
-- Sets up folder structure
+- Sets up folder structure (works with existing vaults!)
 - Provides onboarding guidance
 
-#### `/capture`
+#### Capture
+**Trigger phrases:** "capture this", "save this thought", "remember this", "note this down", "add to my inbox"
 **Purpose:** Get it out of your head and into the system (GTD Capture stage)
 **When:** Anytime you have a thought, task, or idea
 **What it does:**
-- Appends ALL captures to `ObsidianVault/00-Inbox/Daily/YYYY-MM-DD.md`
+- Appends ALL captures to `{{vaultPath}}/00-Inbox/Daily/YYYY-MM-DD.md`
 - No categorization, no routing - just capture with timestamp
 - Works for single items OR full brain dumps
 - **GTD Principle:** "Capture first, clarify later"
 
-#### `/process-inbox`
+#### Process Inbox
+**Trigger phrases:** "process my inbox", "organize my captures", "clarify my tasks", "GTD processing"
 **Purpose:** Clarify, organize, and review (GTD Clarify + Organize + Reflect stages)
 **When:** 3x per week minimum
 **What it does:**
@@ -159,20 +167,22 @@ The system provides AI-powered slash commands for workflow automation.
 - Archives completed projects
 - Updates _Context.md
 
-#### `/daily-plan`
+#### Daily Planning
+**Trigger phrases:** "plan my day", "what should I work on", "daily planning", "morning planning"
 **Purpose:** Choose what to work on today (GTD Engage stage)
 **When:** Every morning
 **What it does:**
-- Checks inbox first (prompts to run `/process-inbox` if 5+ items)
+- Checks inbox first (prompts to process if 5+ items)
 - Handles "no projects" scenario (guides user to create projects)
 - Reads all active projects and extracts next actions
 - Asks about energy, context, time available (GTD four criteria)
 - Generates prioritized task list (must-do, should-do, quick-wins)
-- Creates/enhances plan in `ObsidianVault/Daily Plans/YYYY-MM-DD.md`
+- Creates/enhances plan in `{{vaultPath}}/Daily Plans/YYYY-MM-DD.md`
 - If draft plan exists from closeout, enhances it with energy/context
 - Updates `_Context.md`
 
-#### `/daily-closeout`
+#### Daily Closeout
+**Trigger phrases:** "daily closeout", "review my day", "end of day review", "evening reflection"
 **Purpose:** Daily reflection and tomorrow prep (GTD Reflect stage)
 **When:** Every evening
 **What it does:**
@@ -181,8 +191,16 @@ The system provides AI-powered slash commands for workflow automation.
 - Marks completed/partial/deferred items
 - Asks about tomorrow's priorities (optional)
 - Creates tomorrow's DRAFT plan (priorities without energy/context)
-- Clarifies this is a draft - will be refined by `/daily-plan` in morning
+- Clarifies this is a draft - will be refined by daily planning in morning
 - Updates `_Context.md`
+
+### Proactive Capture
+
+**IMPORTANT:** When researching topics or discussing ideas, Claude will offer to capture valuable insights:
+
+> "That's an interesting insight about [topic]. Would you like me to capture this to your Second Brain?"
+
+This ensures valuable knowledge from conversations isn't lost.
 
 
 ---
@@ -283,51 +301,57 @@ type: project/area/resource/permanent-note/etc
 
 ### Integrated GTD + Zettelkasten
 
-**Commands:**
-- `/setup` - Initial configuration
-- `/capture` - Capture everything
-- `/process-inbox` - Organize and clarify using GTD
-- `/daily-plan` - Plan execution
-- `/daily-closeout` - Review and prepare
+**Natural Language Triggers:**
+- "Set up my second brain" - Initial configuration
+- "Capture: [thought]" - Capture everything
+- "Process my inbox" - Organize and clarify using GTD
+- "Plan my day" - Plan execution
+- "Daily closeout" - Review and prepare
 
 **Note types:**
 - Projects, Tasks, Areas (GTD - for execution)
 - Permanent notes, Reference notes (Zettelkasten - for knowledge)
 
-**Key principle:** `/process-inbox` uses both GTD and Zettelkasten principles to route items appropriately:
+**Key principle:** Inbox processing uses both GTD and Zettelkasten principles to route items appropriately:
 - Actionable items → Projects/Tasks (GTD)
 - Knowledge/insights → Permanent/Reference notes (Zettelkasten)
 - Everything gets organized, nothing falls through cracks
 
 ---
 
-## Skills
+## Skill
 
-### obsidian-mastery
-**Purpose:** Knowledge of Obsidian conventions, PARA, Zettelkasten, Bases syntax, tagging
+### second-brain
+**Purpose:** Unified personal knowledge management and productivity system
 
-**When used:** Creating/editing notes, organizing content, processing inbox
+**Location:** `.claude/skills/second-brain/`
 
-**Key references:**
-- `zettelkasten-processing.md` - Processing workflow
-- `atomic-note-template.md` - Template guide
-- `para-zettelkasten.md` - Methodology overview
-- `tagging-strategy.md` - Tag taxonomy (genericized for all users)
-- `bases-syntax.md` - Obsidian Bases reference
+**What it includes:**
+- GTD methodology (capture, clarify, organize, reflect, engage)
+- Zettelkasten note-taking (atomic notes, connections)
+- PARA folder organization (Projects, Areas, Resources, Archives)
+- Obsidian conventions and formatting
 
-### gtd-workflow
-**Purpose:** GTD methodology and task management
+**Key references (in skill):**
+- `references/gtd-methodology.md` - GTD principles and workflow
+- `references/para-zettelkasten.md` - Folder organization methodology
+- `references/obsidian-mastery.md` - Obsidian conventions
+- `references/tagging-strategy.md` - Tag taxonomy
 
-**When used:** Processing inbox, planning, reviews, task organization
+**Workflows (in skill):**
+- `workflows/setup.md` - First-time setup and existing vault integration
+- `workflows/capture.md` - Quick capture workflow
+- `workflows/process-inbox.md` - GTD clarify and organize
+- `workflows/daily-plan.md` - Morning planning
+- `workflows/daily-closeout.md` - Evening review
 
-**Key concepts:**
-- 5-stage workflow (Capture, Clarify, Organize, Reflect, Engage)
-- Context-based task selection
-- Next action guidelines
-- Weekly review process
+**Templates (in skill):**
+- `templates/project.md`, `templates/area.md`, `templates/permanent-note.md`
+- `templates/fleeting-note.md`, `templates/relationship.md`, `templates/meeting-note.md`
+- `templates/daily-plan.md`, `templates/daily-inbox.md`, `templates/user-context.md`
 
-**Key references:**
-- `folder-structure.md` - PARA folder organization (genericized)
+**For Claude Desktop:**
+The skill folder can be zipped and installed in Claude Desktop for the same functionality.
 
 ---
 
@@ -349,18 +373,18 @@ Users can customize templates to their preferences.
 
 **The Complete Loop:**
 
-1. **Throughout day:** `/capture` → Everything goes to daily inbox (30 sec each)
-2. **3x per week:** `/process-inbox` → Clarify + Organize + Review projects (15 min)
-3. **Every morning:** `/daily-plan` → Choose what to work on (GTD Engage) (5 min)
-4. **Every evening:** `/daily-closeout` → Reflect + Prep tomorrow (GTD Reflect) (5 min)
+1. **Throughout day:** "Capture: [thought]" → Everything goes to daily inbox (30 sec each)
+2. **3x per week:** "Process my inbox" → Clarify + Organize + Review projects (15 min)
+3. **Every morning:** "Plan my day" → Choose what to work on (GTD Engage) (5 min)
+4. **Every evening:** "Daily closeout" → Reflect + Prep tomorrow (GTD Reflect) (5 min)
 
 **Total time commitment:** ~20-25 min/day + 45 min/week processing = Sustainable!
 
 **GTD stages covered:**
-- Capture → `/capture`
-- Clarify + Organize → `/process-inbox`
-- Reflect → `/process-inbox` + `/daily-closeout`
-- Engage → `/daily-plan`
+- Capture → "Capture this" / "Remember this"
+- Clarify + Organize → "Process my inbox"
+- Reflect → "Process my inbox" + "Daily closeout"
+- Engage → "Plan my day"
 
 ---
 
@@ -369,7 +393,7 @@ Users can customize templates to their preferences.
 ### This is a Template
 
 This repository provides a **starting template**. Each user:
-- Defines their own goals during `/setup`
+- Defines their own goals during setup ("set up my second brain")
 - Creates their own project areas
 - Customizes tags to their businesses/life domains
 - Adapts the system to their workflow
@@ -378,7 +402,7 @@ This repository provides a **starting template**. Each user:
 
 ### User-Specific Customizations
 
-After `/setup`, the system contains:
+After setup, the system contains:
 - User's personal goals and priorities
 - User's specific project areas (Work, Side-Business, Personal, etc.)
 - User's specific area tags (#work, #health-fitness, etc.)
@@ -437,9 +461,16 @@ The system includes two main documentation files:
 
 ## Version
 
-**System Version:** 3.0
-**Last Updated:** 2025-11-01
+**System Version:** 4.0
+**Last Updated:** 2025-12-11
 **Status:** Production Ready
+
+**Changes in 4.0:**
+- Unified skill architecture (single `second-brain` skill replaces multiple skills + commands)
+- Natural language triggers instead of slash commands
+- Persistent configuration at `~/.second-brain/config.json`
+- Intelligent handling of existing Obsidian vaults during setup
+- Works for both Claude Code and Claude Desktop
 
 ---
 

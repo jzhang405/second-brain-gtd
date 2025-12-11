@@ -15,7 +15,7 @@ Interactive onboarding to configure your Second Brain system.
 
 **If config doesn't exist OR `setupComplete` = false:**
 - This is FIRST-TIME SETUP
-- Continue to **FLOW A: Full Setup** below
+- Continue to **Step 1: Get Vault Path** below
 
 **If `setupComplete` = true:**
 - This is RE-RUN / UPDATE
@@ -53,6 +53,263 @@ What's the path to your vault?
 - If not, ask: "That directory doesn't exist. Would you like me to create it, or did you mean a different path?"
 
 **Store vault path for all remaining steps.**
+
+---
+
+## Step 1.5: Analyze Existing Vault (CRITICAL)
+
+**After getting vault path, ALWAYS analyze what already exists.**
+
+### Scan the Vault
+
+Use Glob and Read to analyze:
+
+```bash
+# Check for existing folders
+{{vaultPath}}/*/ (top-level folders)
+{{vaultPath}}/**/*.md (all markdown files)
+```
+
+### Detect Existing Structure
+
+Look for evidence of:
+
+**Existing PARA-like structure:**
+- Folders named: Projects, Areas, Resources, Archives (or similar)
+- Folders with numbered prefixes (00-, 01-, 02-, etc.)
+
+**Existing note-taking system:**
+- Daily notes folder (Daily, Journal, Daily Notes)
+- Templates folder
+- Inbox or Capture folder
+- Zettelkasten-style notes (with [[links]])
+
+**Existing organization:**
+- Count total .md files
+- Identify main folders and their contents
+- Check for existing frontmatter patterns
+
+### Decision Point
+
+**If vault is EMPTY or nearly empty (<5 files):**
+- Continue to **Step 2: Welcome** (fresh setup)
+
+**If vault has EXISTING content:**
+- Continue to **FLOW C: Existing Vault Integration** below
+
+---
+
+# FLOW C: Existing Vault Integration
+
+User has an existing Obsidian vault with content. We need to work WITH their existing structure, not against it.
+
+---
+
+## Step C1: Present Analysis
+
+```
+I've analyzed your vault at: {{vaultPath}}
+
+**EXISTING CONTENT DETECTED**
+
+📁 **Folder Structure Found:**
+{{List all top-level folders with file counts}}
+
+📄 **Total Notes:** {{count}} markdown files
+📊 **Largest Folders:** {{top 3 by file count}}
+
+---
+
+**Good news:** I can set up the Second Brain system alongside your existing content without disrupting anything you already have.
+
+I have two options:
+
+**Option A: Additive Setup (Recommended)**
+- Create the Second Brain folders (00-Inbox, 01-Projects, etc.) alongside your existing folders
+- Your existing content stays exactly where it is
+- You can gradually migrate content as you wish
+
+**Option B: Migration Assistance**
+- I'll analyze your content and suggest how it might map to the Second Brain structure
+- We'll go through recommendations together
+- You decide what to move (I won't move anything without explicit approval)
+
+Which approach would you prefer? (A or B)
+```
+
+**Wait for response.**
+
+---
+
+## Step C2a: Additive Setup (Option A)
+
+**Proceed with standard setup but:**
+
+1. **DO NOT delete or modify any existing folders**
+2. **Create Second Brain folders with prefixes to ensure sort order:**
+   - `00-Inbox/` (captures)
+   - `01-Projects/` (GTD projects)
+   - `02-Areas/` (ongoing responsibilities)
+   - `03-Resources/` (reference materials)
+   - `04-Archives/` (completed items)
+   - `Daily Plans/`
+   - `Permanent Notes/`
+
+3. **Check for conflicts:**
+   - If a folder with same name exists, ASK before creating
+   - Example: If they have "Projects/" already, ask:
+     ```
+     You already have a "Projects" folder with {{N}} files.
+
+     I can either:
+     1. Create "01-Projects/" (keeps yours separate)
+     2. Use your existing "Projects/" folder
+
+     Which would you prefer?
+     ```
+
+4. **Continue with Step 2 (Welcome and Introduction)**
+
+---
+
+## Step C2b: Migration Assistance (Option B)
+
+### Analyze Content Categories
+
+Read a sample of files from each major folder to understand content types.
+
+**Look for:**
+- Project-like content (tasks, action items, deadlines)
+- Area-like content (ongoing topics, recurring themes)
+- Reference-like content (information, research, notes from sources)
+- Daily notes or journal entries
+- Templates
+
+### Present Migration Recommendations
+
+```
+Based on my analysis, here's how your content might map to the Second Brain structure:
+
+**PROJECTS (Multi-step outcomes with end dates)**
+Candidates from your vault:
+- {{folder/file}} - Looks like: {{reason}}
+- {{folder/file}} - Looks like: {{reason}}
+
+**AREAS (Ongoing responsibilities, no end date)**
+Candidates from your vault:
+- {{folder/file}} - Looks like: {{reason}}
+- {{folder/file}} - Looks like: {{reason}}
+
+**RESOURCES (Reference materials)**
+Candidates from your vault:
+- {{folder/file}} - Looks like: {{reason}}
+
+**DAILY NOTES**
+{{Found/Not found}} - {{location if found}}
+
+**UNKNOWN / NEEDS REVIEW**
+- {{folder/file}} - Not sure, you should decide
+
+---
+
+**IMPORTANT:** I won't move anything automatically.
+
+Would you like to:
+1. Accept these recommendations and I'll help you move files
+2. Review each recommendation one by one
+3. Skip migration for now and just create the new structure (you can migrate later)
+```
+
+**Wait for response.**
+
+### If User Wants to Migrate
+
+For EACH recommended move:
+
+```
+Move "{{filename}}" from {{current location}} to {{suggested location}}?
+
+**Why:** {{reason this fits the category}}
+
+[Yes / No / Skip all remaining]
+```
+
+**NEVER move files without explicit "Yes" for that specific file.**
+
+### After Migration Review
+
+```
+Migration summary:
+- Moved {{N}} files to Projects
+- Moved {{N}} files to Areas
+- Moved {{N}} files to Resources
+- Kept {{N}} files in original locations
+
+Your existing folders are still intact. You can continue migrating manually anytime.
+```
+
+**Continue to Step 2: Welcome and Introduction**
+
+---
+
+## Step C3: Handle Existing Daily Notes
+
+**If user has existing daily notes system:**
+
+```
+I noticed you have daily notes in: {{location}}
+
+The Second Brain uses:
+- `00-Inbox/Daily/` for captures (quick thoughts throughout the day)
+- `Daily Plans/` for daily planning (morning planning, evening review)
+
+Options:
+1. Keep your existing daily notes where they are (I'll use separate folders)
+2. Use your existing folder for captures instead of 00-Inbox/Daily/
+3. Help me understand your current system so I can adapt
+
+Which would you prefer?
+```
+
+**Adapt folder structure based on their choice.**
+
+---
+
+## Step C4: Handle Existing Templates
+
+**If user has existing templates:**
+
+```
+You have existing templates in: {{location}}
+
+I have templates for:
+- Projects, Areas, Permanent Notes
+- Daily plans, Meeting notes
+- Relationships, Fleeting notes
+
+Options:
+1. Add my templates alongside yours (in your existing Templates folder)
+2. Create a separate "Second-Brain-Templates/" folder
+3. Skip templates (you'll use your existing ones)
+
+Which would you prefer?
+```
+
+**Adapt template handling based on their choice.**
+
+---
+
+## Step C5: Resume Standard Setup
+
+After handling existing vault integration, continue with:
+- **Step 2: Welcome and Introduction** (adapted for existing vault)
+- Remaining steps as normal
+
+**Key adaptations for existing vault:**
+- Skip creating folders that already exist (and user chose to use)
+- Respect user's existing organization
+- Offer to link existing content to new system
+- Be explicit about what's being created vs. what exists
 
 ---
 
