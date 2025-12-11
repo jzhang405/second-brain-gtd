@@ -334,22 +334,43 @@ The system is designed for users who may have ADHD:
 
 ## Tool Usage
 
-The skill uses these tools:
+**Always use the vault path from Claude Memory for all operations.**
+
+### Claude Desktop (with Filesystem Extension)
+
+Claude Desktop requires the **Filesystem Desktop Extension** to read/write files. Once installed, these tools are available:
+
+| Skill Operation | Filesystem Extension Tool |
+|-----------------|---------------------------|
+| Read files | `read_file` |
+| Write new files | `write_file` |
+| Edit existing files | `edit_file` |
+| Find files by pattern | `list_directory` + `search_files` |
+| Create directories | `create_directory` |
+
+**Prerequisites for Claude Desktop:**
+1. Install the **Filesystem** extension from the built-in extension store
+2. Grant access to your Obsidian vault folder when prompted
+3. Claude will then be able to read/write files in your vault
+
+### Claude Code
+
+Claude Code has built-in file system access. These tools are available:
 - **Read** - Check files, load context
 - **Write** - Create new files
 - **Edit** - Update existing files
 - **Glob** - Find files by pattern
-- **Bash** - Create directories if needed (Claude Code only)
+- **Bash** - Create directories, run commands
 
-**Always use the vault path from Claude Memory for all operations.**
-
-### Claude Desktop vs Claude Code
+### Capability Comparison
 
 | Capability | Claude Desktop | Claude Code |
 |------------|----------------|-------------|
-| File operations in vault | ✅ Yes | ✅ Yes |
+| File operations in vault | ✅ Yes (with extension) | ✅ Yes (built-in) |
 | Claude Memory | ✅ Yes | ✅ Yes |
-| Write to `~/.second-brain/` | ❌ No (sandboxed) | ✅ Yes |
+| Config file fallback | ❌ No | ✅ Yes |
 | Bash commands | ❌ No | ✅ Yes |
 
-**Important:** The skill is designed to work in BOTH environments by using Memory for configuration.
+**Important:** The skill is designed to work in BOTH environments:
+- **Configuration** is stored in Claude Memory (works everywhere)
+- **File operations** use the filesystem extension (Desktop) or built-in tools (Code)
