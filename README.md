@@ -2,7 +2,7 @@
 
 A personal knowledge management and productivity system powered by GTD, Zettelkasten, and Obsidian - designed as a skill for Claude Desktop (and compatible with Claude Code).
 
-**Version:** 4.0
+**Version:** 4.1
 **Last Updated:** 2025-12-11
 **Compatible With:** Claude Desktop, Claude Code
 
@@ -50,13 +50,19 @@ A personal knowledge management and productivity system powered by GTD, Zettelka
 
 #### Option A: Claude Desktop (Recommended)
 
-1. **Download the skill:**
+1. **Install the Filesystem Extension** (required for file access):
+   - Open Claude Desktop
+   - Click the **Extensions** icon (or go to Settings → Extensions)
+   - Browse the extension store and find **"Filesystem"**
+   - Click **Install** (one-click, no coding required)
+   - When prompted, grant access to your Obsidian vault folder
+
+   > **Why?** Claude Desktop needs the Filesystem extension to read and write files in your vault. This is a one-time setup.
+
+2. **Download and install the skill:**
    - Download `second-brain-skill.zip` from the releases
    - Or zip the `.claude/skills/second-brain/` folder yourself
-
-2. **Install in Claude Desktop:**
-   - Open Claude Desktop
-   - Go to Settings → Skills
+   - Open Claude Desktop → Settings → Skills
    - Click "Install Skill" and select the zip file
    - The skill will be available in all conversations
 
@@ -64,6 +70,7 @@ A personal knowledge management and productivity system powered by GTD, Zettelka
    - Start a new conversation with Claude
    - Say: **"Set up my Second Brain"**
    - Claude will ask for your vault path and guide you through setup
+   - Your vault path will be saved to Claude's Memory (persists across sessions)
 
 #### Option B: Claude Code
 
@@ -202,28 +209,37 @@ YourVault/
 
 ## Configuration
 
-The skill stores configuration at `~/.second-brain/config.json`. This persists across sessions so Claude always knows where your vault is.
+The skill stores configuration in **Claude's Memory**, which persists across all sessions automatically.
 
-### Config File
+### What Gets Remembered
 
-```json
-{
-  "vaultPath": "/path/to/your/obsidian/vault",
-  "setupComplete": true,
-  "userName": "Your Name",
-  "userContext": "Permanent Notes/Assisting-User-Context.md",
-  "preferences": {
-    "proactiveCapture": true,
-    "inboxThreshold": 5
-  }
-}
-```
+Claude remembers:
+- **Vault path** - Where your Obsidian vault is located
+- **Your name** - For personalized interactions
+- **Setup status** - Whether initial setup is complete
+- **Preferences** - Proactive capture, inbox threshold, etc.
+
+### Why Memory?
+
+Skills in Claude Desktop run in a sandboxed environment and cannot write to arbitrary file paths. Claude's Memory feature provides persistent storage that works in both Claude Desktop and Claude Code.
+
+### Viewing/Editing Memory
+
+In Claude Desktop: **Settings → Capabilities → View and edit memory**
+
+You'll see entries like:
+- "User's Second Brain vault is at /Users/sean/Documents/MyVault"
+- "Second Brain setup is complete"
 
 ### Reconfiguring
 
 To update your setup, just say: **"Reconfigure my Second Brain"** or **"Update my Second Brain setup"**
 
 Claude will show your current configuration and let you update goals, add projects, or change settings.
+
+### Claude Code Fallback
+
+For Claude Code users: If Memory is empty, the skill also checks for a legacy config file at `~/.second-brain/config.json`.
 
 ---
 
@@ -324,8 +340,14 @@ The skill combines three proven productivity systems:
 
 ## FAQ
 
+**Q: Do I need to install anything besides the skill?**
+A: Yes, for Claude Desktop you need the **Filesystem extension** (one-click install from the extension store). This lets Claude read and write files in your vault.
+
 **Q: Do I need Claude Code?**
 A: No. The skill is designed for Claude Desktop. Claude Code is only needed if you want to modify the skill.
+
+**Q: Do I need Node.js or any developer tools?**
+A: No. The Filesystem extension installs with one click from the built-in store. No coding required.
 
 **Q: Can I use an existing Obsidian vault?**
 A: Yes. The skill works with existing vaults and won't overwrite your content.
@@ -342,17 +364,35 @@ A: Your vault is just markdown files. Use Obsidian Sync, iCloud, Dropbox, or Git
 **Q: Can I use this on mobile?**
 A: The vault syncs via Obsidian Sync or cloud storage. Claude Desktop is currently desktop-only.
 
+**Q: How does Claude remember my vault path?**
+A: Claude uses its Memory feature to remember your vault path across sessions. You can view/edit this in Settings → Capabilities → View and edit memory.
+
 ---
 
 ## Troubleshooting
 
+### "Claude can't read/write files in my vault" (Claude Desktop)
+
+**This is the most common issue.** You need the Filesystem extension:
+
+1. Open Claude Desktop → Settings → Extensions
+2. Install the **Filesystem** extension from the store
+3. Grant access to your Obsidian vault folder
+4. Restart Claude Desktop
+
+Without this extension, Claude cannot access files on your computer.
+
 ### "Claude doesn't know my vault path"
 
-The config file may be missing. Say "Set up my Second Brain" to reconfigure.
+Claude Memory may not have your vault path saved. Say **"Set up my Second Brain"** to reconfigure.
+
+To check what Claude remembers: Settings → Capabilities → View and edit memory
 
 ### "Skill not responding to triggers"
 
-Make sure the skill is installed in Claude Desktop (Settings → Skills). Try restarting Claude Desktop.
+1. Make sure the skill is installed (Settings → Skills)
+2. Make sure the Filesystem extension is installed (Settings → Extensions)
+3. Try restarting Claude Desktop
 
 ### "Changes in Claude Code not reflected in Claude Desktop"
 
@@ -360,7 +400,16 @@ Re-zip and reinstall the skill after making changes in Claude Code.
 
 ### "Obsidian shows empty vault"
 
-You may have opened the wrong folder. Make sure you open the vault path from your config, not this repository folder.
+You may have opened the wrong folder. Check your vault path:
+- Ask Claude: "What's my Second Brain vault path?"
+- Or check Memory: Settings → Capabilities → View and edit memory
+
+### "Permission denied" errors
+
+The Filesystem extension only has access to folders you've explicitly granted. Make sure your Obsidian vault folder is in the allowed list:
+1. Settings → Extensions → Filesystem
+2. Check the allowed directories
+3. Add your vault folder if it's not listed
 
 ---
 
@@ -405,6 +454,6 @@ You may have opened the wrong folder. Make sure you open the vault path from you
 
 This skill is provided as-is for personal use. Customize freely.
 
-**Version:** 4.0
+**Version:** 4.1
 **Last Updated:** 2025-12-11
 **Status:** Production Ready
